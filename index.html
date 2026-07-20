@@ -136,6 +136,7 @@ body.read-only .btn-success { display: none !important; }
 body.read-only #fSort { display: none !important; }
 .ro-banner { background: #1F3864; color: #BDD7EE; text-align: center; padding: 5px; font-size: 11px; font-weight: 600; letter-spacing: .3px; display: none; }
 body.read-only .ro-banner { display: block; }
+body.read-only .ro-hide  { display: none !important; }
 </style>
 </head>
 <body>
@@ -211,9 +212,9 @@ body.read-only .ro-banner { display: block; }
       <th class="th-main" rowspan="3" style="width:80px">Grupos</th>
       <th colspan="5" class="th-act">Actividades (por docente)</th>
       <th colspan="2" class="th-evid" rowspan="2">Evidencias (por grupo)</th>
-      <th colspan="3" class="th-seg" rowspan="2">Seguimiento</th>
+      <th id="th-seg-group" colspan="3" class="th-seg" rowspan="2">Seguimiento</th>
       <th class="th-pct" rowspan="3" style="min-width:100px">% Cumpl.<br><span style="font-weight:400;font-size:9px">Final = Coord 50% + Evid 50%</span></th>
-      <th class="th-main" rowspan="3" style="min-width:120px;text-align:left">Notas</th>
+      <th class="th-main ro-hide" rowspan="3" style="min-width:120px;text-align:left">Notas</th>
     </tr>
     <tr>
       <th colspan="2" class="th-act" style="font-size:10px">Secretaría Académica</th>
@@ -229,7 +230,7 @@ body.read-only .ro-banner { display: block; }
       <th class="th-evid" style="min-width:52px">Proyecto<br>Alumno</th>
       <th class="th-seg" style="min-width:90px">Fecha<br>Entrega</th>
       <th class="th-seg" style="min-width:52px">Acuse<br>Enviado</th>
-      <th class="th-seg" style="min-width:80px">Correo</th>
+      <th class="th-seg ro-hide" style="min-width:80px">Correo</th>
     </tr>
   </thead>
   <tbody id="tbody"></tbody>
@@ -273,7 +274,7 @@ const ACT_COORD = ['jIC','jCC','m1'];     // Indicador 2 — Coordinación
 // ── Parches automáticos (escritos por la tarea programada) ──────────────────
 // FILE_UPDATE_TS: la tarea lo actualiza en cada corrida para forzar merge
 // AUTO_UPDATES: array de {doc, gpo, lC, pA, fecha, notas} detectados en Gmail
-const FILE_UPDATE_TS = '2026-07-13T12:00:00';
+const FILE_UPDATE_TS = '2026-07-20T12:00:00';
 const AUTO_UPDATES   = [
   // Osvaldo García — 4-jul
   {doc:'OSVALDO ANTONIO GARCIA MOLINA', gpo:'061', lC:'✓', pA:'✓', fecha:'2026-07-04', notas:'Evaluaciones, listas asistencia y PIA recibidos 4-jul'},
@@ -290,6 +291,15 @@ const AUTO_UPDATES   = [
   {doc:'LUIS ENRIQUE OMANA TIJERINA', gpo:'018', lC:'✓', pA:'✓', fecha:'2026-07-07', notas:'Evaluación + PIA INDARQ recibidos 7-jul'},
   {doc:'LUIS ENRIQUE OMANA TIJERINA', gpo:'023', lC:'✓', pA:'✓', fecha:'2026-07-07', notas:'Evaluación + PIA INDARQ recibidos 7-jul'},
   {doc:'LUIS ENRIQUE OMANA TIJERINA', gpo:'036', lC:'✓', pA:'✓', fecha:'2026-07-07', notas:'Evaluación + PIA INDARQ recibidos 7-jul'},
+  // Diana Janette Hernández Penilla — 17-jul EJ26 (correo institucional diana.hernandezpl@uanl.edu.mx)
+  {doc:'DIANA JANETTE HERNANDEZ PENILLA', gpo:'007', lC:'✓', pA:'✓', fecha:'2026-07-17', notas:'Recibido por correo 17-jul | Borrador acuse creado 20-jul'},
+  {doc:'DIANA JANETTE HERNANDEZ PENILLA', gpo:'011', lC:'✓', pA:'✓', fecha:'2026-07-17', notas:'Recibido por correo 17-jul | Borrador acuse creado 20-jul'},
+  {doc:'DIANA JANETTE HERNANDEZ PENILLA', gpo:'024', lC:'✓', pA:'✓', fecha:'2026-07-17', notas:'Recibido por correo 17-jul | Borrador acuse creado 20-jul'},
+  {doc:'DIANA JANETTE HERNANDEZ PENILLA', gpo:'060', lC:'✓', pA:'✓', fecha:'2026-07-17', notas:'Recibido por correo 17-jul | Borrador acuse creado 20-jul'},
+  // Gabriela Pachuca Castruita — 15-jul EJ26 (PIAs, LC pendiente)
+  {doc:'GABRIELA PACHUCA CASTRUITA', gpo:'005', lC:'', pA:'✓', fecha:'2026-07-15', notas:'PIA recibido 15-jul | Borrador acuse creado 20-jul'},
+  {doc:'GABRIELA PACHUCA CASTRUITA', gpo:'028', lC:'', pA:'✓', fecha:'2026-07-15', notas:'PIA recibido 15-jul | Borrador acuse creado 20-jul'},
+  {doc:'GABRIELA PACHUCA CASTRUITA', gpo:'035', lC:'', pA:'✓', fecha:'2026-07-15', notas:'PIA recibido 15-jul | Borrador acuse creado 20-jul'},
 ];
 
 // ── Parches de asistencia a juntas — jIC/jCC del 19-ene y 22-may (PDFs Coord EJ26) ──
@@ -383,13 +393,13 @@ let DATA = [
   {id:2, doc:'GABRIELA ALEJANDRA ALBUERNE KELLY', ua:'LMC', gpo:'002', lC:'✓', pA:'✓', fecha:'2026-06-29', acuse:'✓', correo:'alealbuerne@hotmail.com', notas:'Recibido por correo 29-jun | Acuse enviado 1-jul'},
   {id:3, doc:'DORIS MORALES GONZALEZ', ua:'LMC', gpo:'003', lC:'✓', pA:'✓', fecha:'2026-06-09', acuse:'✓', correo:'arqdoris.morales@gmail.com', notas:'Borrador acuse creado'},
   {id:4, doc:'MARIA ELISA VAZQUEZ COVARRUBIAS', ua:'LMC', gpo:'004', lC:'✓', pA:'✓', fecha:'2026-06-07', acuse:'', correo:'elvazquec@hotmail.com', notas:'Borrador acuse creado'},
-  {id:5, doc:'GABRIELA PACHUCA CASTRUITA', ua:'LMC', gpo:'005', lC:'', pA:'', fecha:'', acuse:'', correo:'', notas:''},
+  {id:5, doc:'GABRIELA PACHUCA CASTRUITA', ua:'LMC', gpo:'005', lC:'', pA:'✓', fecha:'2026-07-15', acuse:'', correo:'gabrielapachuca@hotmail.com', notas:'PIA recibido 15-jul | Borrador acuse creado 20-jul'},
   {id:6, doc:'FERMINA HINOJOSA VAZQUEZ', ua:'LMC', gpo:'006', lC:'✓', pA:'✓', fecha:'2026-07-02', acuse:'', correo:'', notas:'Recibido por correo 2-jul'},
-  {id:7, doc:'DIANA JANETTE HERNANDEZ PENILLA', ua:'LMC', gpo:'007', lC:'', pA:'', fecha:'', acuse:'', correo:'dianahpenilla@gmail.com', notas:''},
+  {id:7, doc:'DIANA JANETTE HERNANDEZ PENILLA', ua:'LMC', gpo:'007', lC:'✓', pA:'✓', fecha:'2026-07-17', acuse:'', correo:'diana.hernandezpl@uanl.edu.mx', notas:'Recibido por correo 17-jul | Borrador acuse creado 20-jul'},
   {id:8, doc:'FERMINA HINOJOSA VAZQUEZ', ua:'LMC', gpo:'008', lC:'✓', pA:'✓', fecha:'2026-07-02', acuse:'', correo:'', notas:'Recibido por correo 2-jul'},
   {id:9, doc:'MARIA MARLEN DE LEON CEPEDA', ua:'LMC', gpo:'009', lC:'✓', pA:'✓', fecha:'2026-06-01', acuse:'', correo:'mmarlenlc@yahoo.com.mx', notas:'Borrador acuse creado'},
   {id:10, doc:'JESUS ARTEMIO RUIZ ESPARZA', ua:'LMC', gpo:'010', lC:'', pA:'', fecha:'', acuse:'', correo:'ruizesparza89@gmail.com', notas:''},
-  {id:11, doc:'DIANA JANETTE HERNANDEZ PENILLA', ua:'LMC', gpo:'011', lC:'', pA:'', fecha:'', acuse:'', correo:'dianahpenilla@gmail.com', notas:''},
+  {id:11, doc:'DIANA JANETTE HERNANDEZ PENILLA', ua:'LMC', gpo:'011', lC:'✓', pA:'✓', fecha:'2026-07-17', acuse:'', correo:'diana.hernandezpl@uanl.edu.mx', notas:'Recibido por correo 17-jul | Borrador acuse creado 20-jul'},
   {id:12, doc:'YESSICA CAZARES ELIZONDO', ua:'LMC', gpo:'012', lC:'', pA:'', fecha:'', acuse:'', correo:'arq.yecacel@hotmail.com', notas:''},
   {id:13, doc:'ALEJANDRA TELLO BECERRIL', ua:'LMC', gpo:'013', lC:'', pA:'', fecha:'', acuse:'', correo:'atello@uanl.edu.mx', notas:''},
   {id:14, doc:'LUIS ALFONSO DE LA FUENTE SUAREZ', ua:'LMC', gpo:'014', lC:'✓', pA:'✓', fecha:'2026-06-19', acuse:'', correo:'luisalfonsodelafuente@hotmail.com', notas:'Borrador acuse creado'},
@@ -399,20 +409,20 @@ let DATA = [
   {id:18, doc:'CARMEN LUCERO CORONADO GONZALEZ', ua:'LMC', gpo:'018', lC:'', pA:'', fecha:'', acuse:'✓', correo:'carmen.coronadogn@uanl.edu.mx', notas:'Acuse enviado 6-jul'},
   {id:19, doc:'MARIA MARLEN DE LEON CEPEDA', ua:'LMC', gpo:'022', lC:'✓', pA:'✓', fecha:'2026-06-01', acuse:'', correo:'mmarlenlc@yahoo.com.mx', notas:'Borrador acuse creado'},
   {id:20, doc:'GABRIELA ALEJANDRA ALBUERNE KELLY', ua:'LMC', gpo:'023', lC:'✓', pA:'✓', fecha:'2026-06-29', acuse:'✓', correo:'alealbuerne@hotmail.com', notas:'Recibido por correo 29-jun | Acuse enviado 1-jul'},
-  {id:21, doc:'DIANA JANETTE HERNANDEZ PENILLA', ua:'LMC', gpo:'024', lC:'', pA:'', fecha:'', acuse:'', correo:'dianahpenilla@gmail.com', notas:''},
-  {id:22, doc:'GABRIELA PACHUCA CASTRUITA', ua:'LMC', gpo:'028', lC:'', pA:'', fecha:'', acuse:'', correo:'', notas:''},
+  {id:21, doc:'DIANA JANETTE HERNANDEZ PENILLA', ua:'LMC', gpo:'024', lC:'✓', pA:'✓', fecha:'2026-07-17', acuse:'', correo:'diana.hernandezpl@uanl.edu.mx', notas:'Recibido por correo 17-jul | Borrador acuse creado 20-jul'},
+  {id:22, doc:'GABRIELA PACHUCA CASTRUITA', ua:'LMC', gpo:'028', lC:'', pA:'✓', fecha:'2026-07-15', acuse:'', correo:'gabrielapachuca@hotmail.com', notas:'PIA recibido 15-jul | Borrador acuse creado 20-jul'},
   {id:23, doc:'MARIA ELISA VAZQUEZ COVARRUBIAS', ua:'LMC', gpo:'029', lC:'✓', pA:'✓', fecha:'2026-06-07', acuse:'', correo:'elvazquec@hotmail.com', notas:'Borrador acuse creado'},
   {id:24, doc:'DANIEL ALBERTO TORRES GARZA', ua:'LMC', gpo:'030', lC:'✓', pA:'✓', fecha:'2026-06-12', acuse:'✓', correo:'torresgarza.daniel@gmail.com', notas:'Acuse enviado 18-jun'},
   {id:25, doc:'ALEJANDRA MINERVA BENAVIDES LOZANO', ua:'LMC', gpo:'031', lC:'', pA:'', fecha:'', acuse:'', correo:'arq.minerva.benavides@outlook.com', notas:''},
   {id:26, doc:'CARMEN LUCERO CORONADO GONZALEZ', ua:'LMC', gpo:'032', lC:'', pA:'', fecha:'', acuse:'✓', correo:'carmen.coronadogn@uanl.edu.mx', notas:'Acuse enviado 6-jul'},
   {id:27, doc:'ROBERTO EFRAIN PALOMO MARTINEZ', ua:'LMC', gpo:'033', lC:'✓', pA:'✓', fecha:'2026-05-29', acuse:'', correo:'arkixote@gmail.com', notas:'Borrador acuse creado'},
   {id:28, doc:'DORIS MORALES GONZALEZ', ua:'LMC', gpo:'034', lC:'✓', pA:'✓', fecha:'2026-06-09', acuse:'✓', correo:'arqdoris.morales@gmail.com', notas:'Borrador acuse creado'},
-  {id:29, doc:'GABRIELA PACHUCA CASTRUITA', ua:'LMC', gpo:'035', lC:'', pA:'', fecha:'', acuse:'', correo:'', notas:''},
+  {id:29, doc:'GABRIELA PACHUCA CASTRUITA', ua:'LMC', gpo:'035', lC:'', pA:'✓', fecha:'2026-07-15', acuse:'', correo:'gabrielapachuca@hotmail.com', notas:'PIA recibido 15-jul | Borrador acuse creado 20-jul'},
   {id:30, doc:'MARIA ELISA VAZQUEZ COVARRUBIAS', ua:'LMC', gpo:'036', lC:'✓', pA:'✓', fecha:'2026-06-07', acuse:'', correo:'elvazquec@hotmail.com', notas:'Borrador acuse creado'},
   {id:31, doc:'ALMA MIREYA MARTINEZ MARTINEZ', ua:'LMC', gpo:'037', lC:'', pA:'', fecha:'', acuse:'', correo:'arqmireyamtz@hotmail.com', notas:''},
   {id:32, doc:'BERTIN MAURICIO ZAVALA RUGERIO', ua:'LMC', gpo:'038', lC:'✓', pA:'✓', fecha:'2026-06-22', acuse:'', correo:'', notas:'Recibido por correo 22-jun'},
   {id:33, doc:'JACOBO ANTONIO CLETO GARZA', ua:'LMC', gpo:'039', lC:'', pA:'', fecha:'', acuse:'', correo:'', notas:''},
-  {id:34, doc:'DIANA JANETTE HERNANDEZ PENILLA', ua:'LMC', gpo:'060', lC:'', pA:'', fecha:'', acuse:'', correo:'dianahpenilla@gmail.com', notas:''},
+  {id:34, doc:'DIANA JANETTE HERNANDEZ PENILLA', ua:'LMC', gpo:'060', lC:'✓', pA:'✓', fecha:'2026-07-17', acuse:'', correo:'diana.hernandezpl@uanl.edu.mx', notas:'Recibido por correo 17-jul | Borrador acuse creado 20-jul'},
   {id:35, doc:'OSVALDO ANTONIO GARCIA MOLINA', ua:'LMC', gpo:'061', lC:'', pA:'', fecha:'', acuse:'✓', correo:'gamega77@hotmail.com', notas:'Acuse enviado 6-jul'},
   {id:36, doc:'YEYMI GUADALUPE HERNANDEZ RIVERA', ua:'LMC', gpo:'063', lC:'✓', pA:'✓', fecha:'2026-06-25', acuse:'', correo:'', notas:'Recibido por correo 25-jun'},
   {id:37, doc:'ALMA MIREYA MARTINEZ MARTINEZ', ua:'LMC', gpo:'064', lC:'', pA:'', fecha:'', acuse:'', correo:'arqmireyamtz@hotmail.com', notas:''},
@@ -431,13 +441,13 @@ let DATA = [
   {id:50, doc:'ROBERTO EFRAIN PALOMO MARTINEZ', ua:'LDA', gpo:'008', lC:'✓', pA:'✓', fecha:'2026-05-29', acuse:'', correo:'arkixote@gmail.com', notas:'Borrador acuse creado'},
   {id:51, doc:'SONIA GUADALUPE RIVERA CASTILLO', ua:'LDA', gpo:'009', lC:'✓', pA:'✓', fecha:'2026-06-28', acuse:'', correo:'', notas:'Recibido por correo 28-jun'},
   {id:52, doc:'MIRIEL RIVERA SOTO', ua:'LDA', gpo:'010', lC:'✓', pA:'✓', fecha:'2026-06-27', acuse:'✓', correo:'miriel.rivera@icloud.com', notas:'Drive link 27-jun | Acuse enviado 1-jul'},
-  {id:53, doc:'HECTOR MIGUEL GIL LEAL', ua:'LDA', gpo:'011', lC:'', pA:'', fecha:'', acuse:'', correo:'', notas:''},
+  {id:53, doc:'HECTOR MIGUEL GIL LEAL', ua:'LDA', gpo:'011', lC:'', pA:'', fecha:'', acuse:'', correo:'arq.hectorgil@yahoo.com.mx', notas:''},
   {id:54, doc:'ARNULFO ALVARADO RUIZ', ua:'LDA', gpo:'012', lC:'', pA:'', fecha:'', acuse:'', correo:'arnulfo.alvarado@gmail.com', notas:''},
   {id:55, doc:'DANIEL ALBERTO TORRES GARZA', ua:'LDA', gpo:'013', lC:'✓', pA:'✓', fecha:'2026-06-12', acuse:'✓', correo:'torresgarza.daniel@gmail.com', notas:'Acuse enviado 18-jun'},
-  {id:56, doc:'HECTOR MIGUEL GIL LEAL', ua:'LDA', gpo:'014', lC:'', pA:'', fecha:'', acuse:'', correo:'', notas:''},
+  {id:56, doc:'HECTOR MIGUEL GIL LEAL', ua:'LDA', gpo:'014', lC:'', pA:'', fecha:'', acuse:'', correo:'arq.hectorgil@yahoo.com.mx', notas:''},
   {id:57, doc:'MARIA MARLEN DE LEON CEPEDA', ua:'LDA', gpo:'015', lC:'✓', pA:'✓', fecha:'2026-06-01', acuse:'', correo:'mmarlenlc@yahoo.com.mx', notas:'Borrador acuse creado'},
   {id:58, doc:'JESUS EDUARDO DURAN ACOSTA', ua:'LDA', gpo:'016', lC:'', pA:'', fecha:'', acuse:'', correo:'jeday59@gmail.com', notas:''},
-  {id:59, doc:'HECTOR MIGUEL GIL LEAL', ua:'LDA', gpo:'017', lC:'', pA:'', fecha:'', acuse:'', correo:'', notas:''},
+  {id:59, doc:'HECTOR MIGUEL GIL LEAL', ua:'LDA', gpo:'017', lC:'', pA:'', fecha:'', acuse:'', correo:'arq.hectorgil@yahoo.com.mx', notas:''},
   {id:60, doc:'ALEJANDRA TELLO BECERRIL', ua:'LDA', gpo:'018', lC:'', pA:'', fecha:'', acuse:'', correo:'atello@uanl.edu.mx', notas:''},
   {id:61, doc:'JESUS EDUARDO DURAN ACOSTA', ua:'LDA', gpo:'019', lC:'', pA:'', fecha:'', acuse:'', correo:'jeday59@gmail.com', notas:''},
   {id:62, doc:'SARAHI ALVARADO VILLARREAL', ua:'LDA', gpo:'020', lC:'✓', pA:'✓', fecha:'2026-06-09', acuse:'', correo:'sarahialvaradov@gmail.com', notas:'Borrador acuse creado'},
@@ -668,7 +678,7 @@ function render(){
           <span style="font-size:14px;color:var(--muted);transition:transform .2s;display:inline-block;transform:rotate(${isOpen?90:0}deg)">▶</span>
           <div>
             <div class="td-name">${doc}</div>
-            <div class="td-sub">${correo}</div>
+            ${READ_ONLY ? '' : `<div class="td-sub">${correo}</div>`}
           </div>
         </div>
       </td>
@@ -682,7 +692,7 @@ function render(){
       ${evidSumCells}
       <td style="font-size:10px;color:var(--muted)">${gRows[0].fecha||'—'}</td>
       <td>${acuseOk?`<span class="chip c-yes" style="cursor:default">✓</span>`:acusePend?`<span class="chip c-na" style="cursor:default;font-size:10px">parcial</span>`:`<span class="chip c-emp" style="cursor:default">·</span>`}</td>
-      <td style="font-size:10px;color:var(--muted)">${hasWarn?'<span class="flag flag-err">⚠ dirección</span>':hasPend?'<span class="flag flag-warn">evid. pend.</span>':''}</td>
+      ${READ_ONLY ? '' : `<td style="font-size:10px;color:var(--muted)">${hasWarn?'<span class="flag flag-err">⚠ dirección</span>':hasPend?'<span class="flag flag-warn">evid. pend.</span>':''}</td>`}
       <td style="min-width:100px">
         <div class="pct-wrap" style="margin-bottom:3px">
           <div class="pct-track"><div class="pct-fill" style="width:${docPct}%;background:${pc}"></div></div>
@@ -692,7 +702,7 @@ function render(){
           <span title="Indicador 1 — SA">SA:${saP}%</span> · <span title="Indicador 2 — Coord." style="color:#1A5276">Coord:${coP}%</span> · <span title="Indicador 3 — Evidencias" style="color:#145A32">Evid:${evP}%</span>
         </div>
       </td>
-      <td></td>
+      ${READ_ONLY ? '' : '<td></td>'}
     </tr>`;
 
     if(isOpen){
@@ -718,18 +728,18 @@ function render(){
           <td style="background:#F8FAFF"><input type="date" value="${r.fecha||''}" onclick="event.stopPropagation()" onchange="setField(${r.id},'fecha',this.value)"
               style="border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:10px;width:100px;background:#fff"></td>
           <td style="background:#F8FAFF"><button class="chip ${chipCls(r.acuse)}" onclick="event.stopPropagation();toggleChip(${r.id},'acuse')">${r.acuse||'·'}</button></td>
-          <td style="background:#F8FAFF;font-size:10px;color:var(--muted)">${r.correo.split('@')[0]}</td>
+          ${READ_ONLY ? '' : `<td style="background:#F8FAFF;font-size:10px;color:var(--muted)">${r.correo.split('@')[0]}</td>`}
           <td style="background:#F8FAFF">
             <div class="pct-wrap">
               <div class="pct-track"><div class="pct-fill" style="width:${p}%;background:${pc2}"></div></div>
               <span class="pct-num" style="color:${pc2}">${p}%</span>
             </div>
           </td>
-          <td class="left" style="background:#F8FAFF">
+          ${READ_ONLY ? '' : `<td class="left" style="background:#F8FAFF">
             <span>${noteFl}</span>
             <input type="text" value="${r.notas||''}" onclick="event.stopPropagation()" onchange="setField(${r.id},'notas',this.value)"
               style="border:1px solid var(--border);border-radius:4px;padding:2px 5px;font-size:10px;width:110px;background:#fff">
-          </td>
+          </td>`}
         </tr>`;
       });
     }
@@ -749,13 +759,14 @@ function render(){
      ${actTots.map(t=>`<td style="color:#C6EFCE">${t}</td>`).join('')}
      ${evidTots.map(t=>`<td style="color:#C6EFCE">${t}</td>`).join('')}
      <td colspan="2"></td>
+     ${READ_ONLY ? '' : '<td></td>'}
      <td style="color:#BDD7EE;font-size:9px;line-height:1.6">
        <span style="color:#F9E79F">SA:${avgSA}%</span> ·
        <span style="color:#A9DFBF">Coord:${avgCoord}%</span> ·
        <span style="color:#A9DFBF">Evid:${avgEvid}%</span><br>
        <b style="font-size:11px">Final: ${avgFinal}%</b>
      </td>
-     <td></td>`;
+     ${READ_ONLY ? '' : '<td></td>'}`;
 
   kpis();
 }
@@ -797,7 +808,11 @@ function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg
 
 // ── Modo solo lectura en GitHub Pages ──
 const READ_ONLY = window.location.hostname.includes('github.io');
-if (READ_ONLY) document.body.classList.add('read-only');
+if (READ_ONLY) {
+  document.body.classList.add('read-only');
+  const segEl = document.getElementById('th-seg-group');
+  if (segEl) segEl.setAttribute('colspan', '2');
+}
 
 load();
 render();

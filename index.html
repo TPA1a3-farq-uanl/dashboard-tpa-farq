@@ -536,6 +536,7 @@ function uaCls(ua){ return {LMC:'ua-lmc',LDA:'ua-lda',IDA:'ua-ida'}[ua]||''; }
 const STORE_KEY = 'farq_ej26_v10';
 function saveAll(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify({DATA,TEACH,nextId})); }catch(e){} }
 function load(){
+  if(READ_ONLY) return; // GitHub Pages: siempre usar datos del archivo, ignorar localStorage
   try{
     ['farq_ej26','farq_cumplimiento','farq_ej26_v2','farq_ej26_v3','farq_ej26_v4','farq_ej26_v5','farq_ej26_v6','farq_ej26_v7','farq_ej26_v8','farq_ej26_v9'].forEach(k=>localStorage.removeItem(k));
     const d = JSON.parse(localStorage.getItem(STORE_KEY)||'null');
